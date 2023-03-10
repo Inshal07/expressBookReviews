@@ -4,13 +4,10 @@ let books = require("./booksdb.js");
 const regd_users = express.Router();
 
 let users = [
-  {
-    username: 'inshal1',
-    password: 'Test@123'
-  }
+ 
 ];
 
-const isValid = (username)=>{   
+const valid = (username)=>{   
   let sameUserName = users.filter((user)=>{
     return user.username = username;
    })
@@ -22,26 +19,29 @@ const isValid = (username)=>{
    }
 }
 
-const authenticatedUser = (username,password)=>{
-   //returns boolean
+const authUser = (username,password)=>{ 
   const user = users.find(u => u.username == username && u.password == password);
-  return user ? true : false;
+  if(user){
+    return true
+  }else{
+    return false
+  }
+  
 }
 
 //only registered users can login
 regd_users.post("/login", (req,res) => {
-  const username = req.body.username;
-  const password = req.body.password;
-  console.log(username, password);
+ const {username, password} = req.body; 
+
   if(!username || !password){
     res.status(404).json({message:"User Not Found!!!"});
   }
 
-  if(authenticatedUser(username, password)){
-    let accessToken=jwt.sign({ data: password },'access',{expiresIn:60*60});
+  if(authUser(username, password)){
+    let accessToken =jwt.sign({ data: password },'access',{expiresIn:60*60});
 
     req.session.authorization={
-      accessToken,username
+      accessToken, username
     }
     return res.status(200).json({message:"User logged in"})
   }
@@ -53,14 +53,13 @@ regd_users.post("/login", (req,res) => {
 
 // Add a book review
 regd_users.put("/auth/review/:isbn", (req, res) => {
-  const username=req.body.username;
-  const password=req.body.password;
+  const {username, password} = req.body; 
 
   if(!username || !password){
     return res.status(404).json({message:"User Not Found!!!"});
   }
  
-  if(authenticatedUser(username,password)){
+  if(authUser(username,password)){
     let isbn = req.params.isbn;
     let book = books[isbn];
     if(book){
@@ -87,7 +86,7 @@ regd_users.delete("/auth/review/:isbn",(req,res)=>{
     return res.status(404).json({message:"User Not Found!!!"});
   }
 
-  if(authenticatedUser(username,password)){
+  if(authUser(username,password)){
     let isbn=req.params.isbn;
     
     if(isbn){

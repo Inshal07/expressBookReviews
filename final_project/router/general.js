@@ -1,6 +1,6 @@
 const express = require('express');
 let books = require("./booksdb.js");
-let isValid = require("./auth_users.js").isValid;
+let valid = require("./auth_users.js").valid;
 let users = require("./auth_users.js").users;
 const public_users = express.Router();
 
@@ -9,16 +9,16 @@ public_users.post("/register", (req,res) => {
   const username = req.body.username;
   const password = req.body.password; 
   if (username && password) {
-      if (isValid(username)) {
+      if (valid(username)) {
           users.push({"username":username,"password":password});
           return res.status(200).json({message:`Customer is registered successfully`});
       }
       else {
-          return res.status(400).json({message:`User ${username} already registered`});
+          return res.status(400).json({message:`User already registered`});
       }
   }
   else {
-      return res.status(404).json({message: "Must provide username and password"});
+      return res.status(400).json({message: "Enter username and password"});
   }
 });
 
@@ -32,36 +32,25 @@ public_users.get('/',function (req, res) {
 // Get book details based on ISBN
 public_users.get('/isbn/:isbn',function (req, res) {
   //Write your code here 
-   const bookISBN = books[req.params.isbn]
-   console.log(bookISBN);
+   const bookISBN = books[req.params.isbn] 
   res.send(bookISBN).status(200);
  });
 
- function listBooks() {
-  return new Promise((resolve, reject) => {
-    resolve(books)
-  } );
-}
-  
+ 
 // Get book details based on author
 public_users.get('/author/:author',function (req, res) {
   //Write your code here
   const author = req.params.author;
-  for(let i=1;i<=10;i++){
-    if (books[i].author === author) {
-       res.send(books[i]);
-  }}
- 
+  const bookAuthor = Object.values(books).filter(book => book.author === author);
+  res.status(200).send(bookAuthor);
 });
 
 // Get all books based on title
 public_users.get('/title/:title',function (req, res) {
   //Write your code here
   const title = req.params.title;
-  for(let i=1; i<=10; i++){
-    if (books[i].title === title) {
-      return res.send(books[i]).status(200);
-  }}
+  const bookTitle = Object.values(books).filter(book => book.title === title);
+  res.status(200).send(bookTitle);
 });
 
 //  Get book review
