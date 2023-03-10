@@ -3,7 +3,12 @@ const jwt = require('jsonwebtoken');
 let books = require("./booksdb.js");
 const regd_users = express.Router();
 
-let users = [];
+let users = [
+  {
+    username: 'inshal1',
+    password: 'Test@123'
+  }
+];
 
 const isValid = (username)=>{   
   let sameUserName = users.filter((user)=>{
@@ -27,7 +32,7 @@ const authenticatedUser = (username,password)=>{
 regd_users.post("/login", (req,res) => {
   const username = req.body.username;
   const password = req.body.password;
-
+  console.log(username, password);
   if(!username || !password){
     res.status(404).json({message:"User Not Found!!!"});
   }
@@ -54,10 +59,10 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
   if(!username || !password){
     return res.status(404).json({message:"User Not Found!!!"});
   }
-
+ 
   if(authenticatedUser(username,password)){
-    let isbn=req.params.isbn;
-    let book=books[isbn];
+    let isbn = req.params.isbn;
+    let book = books[isbn];
     if(book){
       let review=req.body.reviews;
       if(review){
